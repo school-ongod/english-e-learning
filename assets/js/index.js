@@ -1,7 +1,6 @@
 let questionNr = 0;
 let goodQuestionNr = 1;
 let questions = [];
-let answers = [];
 let formData = [];
 let lengthQuestions;
 let index = 0;
@@ -66,18 +65,41 @@ function checkQuestionOut() {
 function checkAnswer(yourAnswer) {
   const currentQuestion = data[index];
 
-  if (currentQuestion.good_answer === yourAnswer) {
-    alert("Antwoord goed");
-    good++;
-  } else {
-    alert(
-      `Antwoord niet goed, goede antwoord was: ${currentQuestion.good_answer}`
-    );
-    wrong++;
-  }
+  fetch(
+    `./checkAnswer.php?questionId=${currentQuestion.id}&answer=${yourAnswer}`,
+    {
+      method: "GET",
+      headers: { "Content-type": "application/json" },
+    }
+  )
+    .then((response) => response.json())
+    .then((json) => {
+      if (json.hasOwnProperty("error")) {
+        // Handle server-side errors
+        alert("Error: " + json.error);
+        return;
+      }
 
-  index++;
-  checkQuestionOut();
+      if (json.result === "correct") {
+        alert("Antwoord goed");
+        good++;
+      } else if (json.result === "incorrect") {
+        alert(
+          `Antwoord niet goed, juiste antwoord was: ${json.correct_answer}`
+        );
+        wrong++;
+      } else {
+        // Handle unexpected responses
+        alert("Onverwachte reactie van de server.");
+      }
+
+      index++;
+      checkQuestionOut();
+    })
+    .catch((error) => {
+      // Handle network errors
+      console.error(error);
+    });
 }
 
 function nextQuestion() {

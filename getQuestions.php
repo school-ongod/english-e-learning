@@ -15,11 +15,15 @@ try {
         throw new Exception('Invalid listId parameter.');
     }
 
-    $dataArrayQuestions = $questionsClass->getAllQuestionsByListId($listId, $connectionClass->setConnection());
+    $dataArrayQuestions = $questionsClass->getAllQuestionsDataByListId($listId, $connectionClass->setConnection());
 
-    if ($dataArrayQuestions->num_rows > 0) {
-        while ($row = $dataArrayQuestions->fetch_assoc()) {
-            $array[] = $row;
+    if ($dataArrayQuestions) {
+        foreach ($dataArrayQuestions as $question) {
+            $array[] = [
+                'id' => $question['id'],
+                'lists_id' => $question['lists_id'],
+                'question' => $question['question']
+            ];
         }
     }
 
